@@ -1,0 +1,1894 @@
+<!DOCTYPE html>
+<!--
+  Ethelium client admin — demo build.
+  One shared password, four tabs, changes live on the public page immediately.
+  The gate here is client-side and is theatre: it demonstrates the flow, it is
+  not security. Production swaps it for the signed-cookie engine in
+  upsells/reference/src/lib-admin/. Per-lead strings are tokens filled by render.py.
+-->
+<html lang="en-AU" data-slug="joe-vu-lawn-service">
+<head>
+<meta charset="utf-8">
+<!-- viewport-fit=cover so env(safe-area-inset-*) is real on a notched phone.
+     Without it the insets read 0 and the header sits under the status bar. -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Joe Vu Lawn Service — Owner admin</title>
+<meta name="robots" content="noindex, nofollow">
+
+<!-- Added to a home screen this runs with no browser chrome at all, so the
+     page has to supply the things the browser used to: an icon, a name short
+     enough to sit under it, and a colour for the bar above it. -->
+<link rel="manifest" href="/admin.webmanifest">
+<meta name="theme-color" content="#1b3316">
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<!-- Translucent, so the dark green runs up behind the clock instead of leaving
+     a black band above it. The header pads itself out of the way below. -->
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Joe Vu">
+<!-- The fonts, served from our own origin. They used to come from Google: a
+     render-blocking stylesheet on a third-party host that took 555ms on its own,
+     slower than everything else on this page put together, and only when it
+     landed did the font files themselves start downloading, from a second host.
+
+     Latin and latin-ext only. Google also offers Cyrillic, Greek and
+     Vietnamese; a lawn round in Sydney does not need them. The arrows, stars
+     and ticks on the page fall outside all of these ranges and fall back to a
+     system face, exactly as they always did. -->
+<style>
+@font-face{
+  font-family: 'Instrument Serif';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/instrument-serif-italic-400-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face{
+  font-family: 'Instrument Serif';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/instrument-serif-italic-400-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face{
+  font-family: 'Instrument Serif';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/instrument-serif-400-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face{
+  font-family: 'Instrument Serif';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/instrument-serif-400-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face{
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/manrope-400-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face{
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/manrope-400-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face{
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(/manrope-500-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face{
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(/manrope-500-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face{
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(/manrope-600-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face{
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(/manrope-600-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face{
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(/manrope-700-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face{
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(/manrope-700-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face{
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url(/manrope-800-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face{
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url(/manrope-800-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+</style>
+<style>
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:#f2f4f0;color:#171a17;font-family:Manrope,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:#3f6a34}
+  .wrap{width:100%;max-width:980px;margin:0 auto;padding:0 26px}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:999px;border:0;font:600 13.5px Manrope,sans-serif;cursor:pointer;transition:transform .15s,background .15s}
+  .btn:hover{transform:translateY(-1px)}
+  .btn-p{background:#1b3316;color:#fff}
+  .btn-s{background:#fff;color:#1d2a1c;border:1px solid rgba(20,40,20,.18)}
+  .btn-d{background:#fff;color:#9c3222;border:1px solid rgba(156,50,34,.3)}
+  .card{background:#fff;border:1px solid rgba(20,40,20,.1);border-radius:14px;padding:24px 24px 26px;box-shadow:0 1px 2px rgba(20,40,20,.05)}
+  .fld{width:100%;padding:10px 12px;border-radius:9px;border:1px solid rgba(20,40,20,.16);background:#fff;font:500 13.5px Manrope,sans-serif;color:#171a17}
+  .fld:focus{outline:2px solid rgba(63,106,52,.32);outline-offset:1px;border-color:#3f6a34}
+  textarea.fld{resize:vertical;line-height:1.6}
+  label.lbl{display:block;font-size:11.5px;font-weight:600;letter-spacing:.05em;color:rgba(23,26,23,.6);margin:0 0 6px}
+  .hint{font-size:11.5px;line-height:1.6;color:rgba(23,26,23,.48);margin:6px 0 0}
+  .row{margin-bottom:18px}
+  .tabs{display:flex;gap:4px;flex-wrap:wrap}
+  .tab{padding:10px 18px;border-radius:999px;border:1px solid transparent;background:transparent;font:600 13.5px Manrope,sans-serif;color:rgba(23,26,23,.6);cursor:pointer}
+  .tab[aria-selected="true"]{background:#1b3316;color:#fff}
+  .tab:hover:not([aria-selected="true"]){background:rgba(20,40,20,.06)}
+  .cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+  .cal-dow{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:8px}
+  .cal-dow span{text-align:center;font-size:11px;font-weight:600;letter-spacing:.08em;color:rgba(23,26,23,.45)}
+  .cal-day{aspect-ratio:1/1;border-radius:9px;border:1px solid rgba(20,40,20,.1);background:#fff;font:600 13px Manrope,sans-serif;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:0}
+  .cal-day.blank{border:0;background:transparent;cursor:default}
+  .cal-day.off{background:#f1f1ef;color:rgba(23,26,23,.3)}
+  .cal-day.blocked{background:#fbeae6;border-color:#e2b3a6;color:#9c3222}
+  .cal-day.partial{background:#fff6e6;border-color:#e6cf9e;color:#8a6300}
+  .cal-day[aria-pressed="true"]{outline:2px solid #1b3316;outline-offset:1px}
+  .cal-day.past{background:transparent;color:rgba(23,26,23,.22);cursor:default;border-color:transparent}
+  .cal-day .mini{font-size:9px;font-weight:600;letter-spacing:.02em}
+  .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(80px);background:#1b3316;color:#fff;padding:13px 22px;border-radius:999px;font:600 13.5px Manrope,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.22);opacity:0;transition:transform .25s,opacity .25s;pointer-events:none;z-index:50}
+  .toast.on{transform:translateX(-50%) translateY(0);opacity:1}
+  table{width:100%;border-collapse:collapse}
+  th{text-align:left;font-size:11px;font-weight:600;letter-spacing:.08em;color:rgba(23,26,23,.45);padding:0 10px 10px;border-bottom:1px solid rgba(20,40,20,.1)}
+  td{padding:14px 10px;border-bottom:1px solid rgba(20,40,20,.07);font-size:13px;vertical-align:top}
+  .pill{display:inline-block;padding:4px 11px;border-radius:999px;font-size:11px;font-weight:600}
+  @media (max-width:760px){
+    .two{grid-template-columns:1fr!important}
+    .topbar-in{flex-direction:column;align-items:flex-start!important;gap:14px}
+    table,thead,tbody,th,td,tr{display:block}
+    thead{display:none}
+    td{border:0;padding:3px 0}
+    tbody tr{display:block;padding:14px 0;border-bottom:1px solid rgba(20,40,20,.09)}
+  }
+</style>
+</head>
+<body>
+
+<!-- login -->
+<div id="gate" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:26px">
+  <form id="gate-form" class="card" style="width:100%;max-width:390px;padding:34px 32px 32px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <img src="/logo-bar.png" alt="Joe Vu Lawn Service" style="height:64px;width:auto;display:block;margin:0 auto">
+      <span style="font-size:17px;font-weight:800;letter-spacing:.02em">Joe Vu Lawn Service</span>
+    </div>
+    <h1 style="margin:22px 0 0;font-size:24px;font-weight:700;letter-spacing:-.02em">Owner login</h1>
+    <p style="margin:9px 0 22px;font-size:13px;line-height:1.65;color:rgba(23,26,23,.6)">Sign in to change what is on your website — your words, your services, the days you are available, and your bookings.</p>
+    <label class="lbl" for="pw">Password</label>
+    <input class="fld" type="password" id="pw" autocomplete="current-password" required>
+    <p id="gate-err" style="display:none;margin:10px 0 0;font-size:12.5px;font-weight:600;color:#9c3222">That password is not right. Try again.</p>
+    <button class="btn btn-p" type="submit" style="width:100%;margin-top:20px;justify-content:center">Sign in</button>
+  </form>
+</div>
+
+<!-- app -->
+<div id="app" hidden>
+  <div style="background:#1b3316;color:#fff;padding:18px 0;padding-top:calc(18px + env(safe-area-inset-top))">
+    <div class="wrap topbar-in" style="display:flex;align-items:center;justify-content:space-between;gap:18px">
+      <div style="display:flex;align-items:center;gap:11px">
+        <img src="/logo-bar.png" alt="Joe Vu Lawn Service" style="height:40px;width:auto;border-radius:8px;background:#fff;display:block;flex:none">
+        <div>
+          <div style="font-size:15px;font-weight:800;letter-spacing:.02em">Joe Vu Lawn Service</div>
+          <div style="font-size:11.5px;color:rgba(255,255,255,.6)">Owner admin</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <a class="btn btn-s" href="/" target="_blank" rel="noopener">View my site ↗</a>
+        <button class="btn btn-s" type="button" id="sign-out">Sign out</button>
+      </div>
+    </div>
+  </div>
+
+  <div style="background:#fff;border-bottom:1px solid rgba(20,40,20,.09);padding:14px 0">
+    <div class="wrap">
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" data-tab="bookings" aria-selected="true">Bookings <span id="bk-count" style="opacity:.7"></span></button>
+        <button class="tab" role="tab" data-tab="availability" aria-selected="false">Availability</button>
+        <button class="tab" role="tab" data-tab="content" aria-selected="false">Website text</button>
+        <button class="tab" role="tab" data-tab="reviews" aria-selected="false">Google reviews</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap" style="padding-top:30px;padding-bottom:calc(70px + env(safe-area-inset-bottom))">
+    <div id="panel"></div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script id="eth-defaults" type="application/json">{"content": {"business": "Joe Vu Lawn Service", "brand": "Joe Vu Lawn Service", "phone": "0418 435 193", "hours_note": "Mon–Sun, 8am–6pm", "credential": "Approved Service Provider for the Department of Education", "areas_all": "All of Sydney", "eyebrow": "", "h1_a": "Book your lawn in,", "h1_b": "pick your", "h1_accent": "day", "hero_lead": "Specialising in lawns, hedges and garden maintenance across Sydney, domestic and commercial. Pick a day that suits you and book it in — no phone tag, no waiting on a callback.", "about_lead_pre": "At", "about_lead_post": "a yard is not finished when the grass is short — it is finished when the edges are crisp and the clippings are gone.", "about_lead_muted": "Mowing, hedging and the tidy-up, handled as one job.", "about_body": "Specialising in lawns, hedges and garden maintenance in both domestic and commercial property. Same operator every visit, so the yard is already known — which corner stays wet, how fast the back lawn gets away over summer, where the sprinkler heads are. Quotes are given in detail before any work starts, and everything cut is cleared away before we leave.", "services": [{"tag": "MOWING", "title": "Lawn Mowing & Edging", "body": "Weekly, fortnightly or monthly cuts with crisp striping, clean edges, and every clipping cleared away before we leave."}, {"tag": "HEDGES", "title": "Hedge Trimming & Pruning", "body": "Shaping, thinning and seasonal pruning that keeps borders sharp and the plants themselves healthy."}, {"tag": "GARDENS", "title": "Garden Maintenance", "body": "Weeding, mulching and pruning so the beds look as tidy as the lawn does. Domestic and commercial."}], "service_photos": {"MOWING": "mowing", "HEDGES": "hedges", "GARDENS": "gardens"}, "suburbs": ["Kingsgrove", "Mascot", "Bexley", "Earlwood", "Hurstville", "Rockdale", "Beverly Hills", "Canterbury", "Marrickville"], "area_blurb": "Based in Kingsgrove, servicing all Sydney areas. If your suburb is not on the list, ask anyway — there is a good chance we are already on your side of town that week.", "booking_services": ["Lawn mowing", "Lawn mowing + edging", "Hedge trimming", "Garden maintenance", "One-off tidy-up", "Commercial / strata visit"], "cta_heading_a": "Book your first cut", "cta_heading_b": "this week", "cta_body": "Free walkthrough, fixed price, no contract. Pick a day on the calendar and it is locked in.", "footer_blurb": "Lawn mowing, hedging and garden maintenance for domestic and commercial property across Sydney. Locally owned and operated.", "whatsapp": "61418435193", "whatsapp_text": "Hi Joe, I found you online — could I get a quote for some lawn work?"}, "availability": {"workDays": [true, true, true, true, true, true, false], "slots": ["7:00 am", "9:00 am", "11:00 am", "1:00 pm", "3:00 pm"], "blocked": [], "blockedSlots": {}, "leadDays": 1}, "bookings": [], "tz": "Australia/Sydney", "reviews": {"connected": true, "rating": "5.0", "count": "130", "url": "https://www.google.com/maps/place/Joe+Vu+Lawn+Service/data=!4m2!3m1!1s0x6b12b9a62853624d:0x447d90c371e4df23", "items": [{"name": "Sarang Sathe", "meta": "Local Guide · 15 reviews", "when": "3 months ago", "text": "Joe just finished with the front lawn and trimming the hedges and tidying up the yard. Really happy with his work and professionalism. Joe was easy to contact, was quick to respond and provided a detailed quote before commencing the work. I would definitely recommend Joe for your gardening needs!", "reply": ""}, {"name": "Linda Screnci", "meta": "1 review", "when": "7 months ago", "text": "Thank you Joe for going above and beyond on what we know was a difficult job, mowing more than 1000sqm at our mother's home on an incredibly hot 40 degree day! Thanks for showing up and ploughing through the job which came out beautifully. The backyard looks like you can play a game of soccer on it! We have no hesitation in recommending Joe for any lawn work, he has been an absolute pleasure to deal with.", "reply": ""}, {"name": "Jonathan Sha", "meta": "7 reviews", "when": "5 months ago", "text": "Joe did a fantastic job with my lawn. He was friendly, professional, and really took the time to do the job properly instead of rushing through it. The lawn looks great and he paid attention to the details. He also gave me some helpful advice about moth eggs growing in the lawn and how to manage them, which I really appreciated. Highly recommend Joe if you're looking for someone reliable and thorough for lawn mowing.", "reply": "I'm glad I can help you with your lawn need, thank you for your support, very much appreciated Jonathan, I will see you 4 weeks time"}]}}</script>
+<script>
+/* Joe Vu Lawn Service — store.
+   The production persistence layer. Everything Joe edits lives in KV behind
+   this site's own Worker, not in a browser: he edits on his phone and his
+   customers see it, which is the whole difference between this and the demo
+   it grew out of. localStorage is kept only as a read-through cache so the
+   page still paints if the network is slow.
+   Dates are handled as local Y-M-D strings on purpose: toISOString() slices in
+   UTC and would shift the day for every user in an AU timezone. */
+(function () {
+  'use strict';
+
+  var SLUG = document.documentElement.getAttribute('data-slug') || 'demo';
+  var NS = 'eth:' + SLUG + ':v1:';
+  var PARTS = ['content', 'availability', 'bookings', 'reviews'];
+
+  var defaults = {};
+  try {
+    var el = document.getElementById('eth-defaults');
+    if (el) defaults = JSON.parse(el.textContent);
+  } catch (e) { defaults = {}; }
+
+  function read(part) {
+    try {
+      var raw = localStorage.getItem(NS + part);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) { return null; }
+  }
+
+  function write(part, value) {
+    try {
+      localStorage.setItem(NS + part, JSON.stringify(value));
+      return true;
+    } catch (e) { return false; }
+  }
+
+  /* Overrides are shallow-merged over the defaults, so a field the owner has
+     never touched keeps tracking the shipped copy instead of freezing a stale
+     value into their browser. */
+  function get(part) {
+    if (part === 'bookings') return (cache || []).slice();
+    if (server && server[part] != null) {
+      var v = server[part];
+      if (Array.isArray(v)) return v.slice();
+      /* Still merged over the shipped copy, so a field Joe has never touched
+         keeps tracking the built-in text instead of freezing an old value. */
+      var merged = {}, dk, sk;
+      for (dk in defaults[part]) if (Object.prototype.hasOwnProperty.call(defaults[part], dk)) merged[dk] = defaults[part][dk];
+      for (sk in v) if (Object.prototype.hasOwnProperty.call(v, sk)) merged[sk] = v[sk];
+      return merged;
+    }
+    var base = defaults[part];
+    var over = read(part);
+    if (Array.isArray(base)) return over || base.slice();
+    var out = {};
+    var k;
+    for (k in base) if (Object.prototype.hasOwnProperty.call(base, k)) out[k] = base[k];
+    if (over) for (k in over) if (Object.prototype.hasOwnProperty.call(over, k)) out[k] = over[k];
+    return out;
+  }
+
+  /* Owner edits go to the server. The local copy is updated first so the admin
+     UI is instant, then the save is sent; a failed save surfaces rather than
+     silently pretending it worked. */
+  function set(part, value) {
+    if (!server) server = {};
+    server[part] = value;
+    write(part, value);
+    var payload = {};
+    payload[part] = value;
+    return ask('/admin/site', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).then(function () { return true; });
+  }
+
+  /* --- the server ---------------------------------------------------------
+     One Worker on this origin serves both the page and its API, so every call
+     here is same-origin: no CORS, no separate hostname, no token in the page.
+
+     The public read deliberately returns only WHICH SLOTS ARE TAKEN, never who
+     booked them. The demo this grew from answered with the full booking list —
+     names, phones, addresses — to anyone who asked for it. That is fine for two
+     fake bookings and a privacy breach for a real business. */
+
+  var API = '/api';
+  var remote = false;      // did the last talk to the server succeed?
+  var server = null;       // { content, availability, reviews } as saved
+  var cache = null;        // bookings: full records for the owner, stubs publicly
+  var reviewPool = [];     // Google's own five, read weekly; shown after Joe's
+  var events = [];         // Joe's own diary. The owner's alone; never sent publicly.
+  var sync = null;         // how the last read of his Google Calendar went
+  var syncOn = false;      // whether a calendar is connected at all
+  var ignore = [];         // names on his calendar that must not close the site
+  var reviewSync = null;   // how the weekly read of his Google rating went
+  var reviewsAuto = false; // whether Google is connected at all
+  var reviewTouched = null;// when a human last moved the review count
+
+  function apiUrl(path) { return API + path; }
+
+  function ask(path, options) {
+    return fetch(apiUrl(path), options || {}).then(function (r) {
+      if (!r.ok) {
+        return r.json().catch(function () { return {}; }).then(function (b) {
+          var e = new Error(b.error || ('HTTP ' + r.status));
+          e.status = r.status;
+          throw e;
+        });
+      }
+      return r.json();
+    });
+  }
+
+  /* Turn the public { "2026-09-04": ["9:00 am"] } shape into the same
+     {date, slot} records the calendar code already understands, so nothing
+     above this line has to know which of the two it is looking at. */
+  function stubs(taken) {
+    var out = [];
+    for (var date in taken) {
+      if (!Object.prototype.hasOwnProperty.call(taken, date)) continue;
+      taken[date].forEach(function (slot) {
+        out.push({ id: 'x', date: date, slot: slot, status: 'confirmed' });
+      });
+    }
+    return out;
+  }
+
+  function syncBookings(asOwner) {
+    return ask('/site', { method: 'GET' })
+      .then(function (data) {
+        server = {
+          content: data.content || null,
+          availability: data.availability || null,
+          reviews: data.reviews || null
+        };
+        reviewPool = data.reviewPool || [];
+        cache = stubs(data.taken || {});
+        remote = true;
+
+        /* Only the admin page may ask for the real records, and not merely
+           because the public one is refused them. When the owner is logged in
+           on the same browser the request SUCCEEDS, and the line below replaces
+           the closures the public payload just described with the handful of
+           website bookings — so his own site showed every slot free while a
+           customer's browser correctly showed them gone. The bug hid because a
+           logged-out browser is the only one that ever sees it work. */
+        if (!asOwner) return cache;
+
+        /* The owner is allowed the real records; a stale session gets a 401
+           here and keeps the stubs, which is all the booking form needs. */
+        return ask('/admin/bookings', { method: 'GET' })
+          .then(function (d) {
+            cache = d.bookings || [];
+            events = d.events || [];
+            sync = d.sync || null;
+            syncOn = !!d.syncOn;
+            ignore = d.ignore || [];
+            reviewSync = d.reviewSync || null;
+            reviewsAuto = !!d.reviewsAuto;
+            reviewTouched = d.reviewTouched || null;
+            /* Only the owner is told this, so only the owner's admin can show
+               the subscribe link. */
+            if (d.feedToken) server.feedToken = d.feedToken;
+            return cache;
+          })
+          .catch(function () { return cache; });
+      })
+      .catch(function () {
+        remote = false;
+        return read('bookings') || [];
+      });
+  }
+
+  function addBooking(booking) {
+    return ask('/bookings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(booking)
+    }).then(function (data) {
+      remote = true;
+      /* Only the slot comes back, never the record, so hold the slot locally
+         and let the next sync replace it. */
+      cache = (cache || []).concat([{
+        id: data.booking.id, date: data.booking.date,
+        slot: data.booking.slot, status: 'new'
+      }]);
+      return data.booking;
+    });
+  }
+
+  function patchBooking(id, status) {
+    return ask('/admin/bookings/' + encodeURIComponent(id), {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: status })
+    }).then(function (data) { cache = data.bookings || []; remote = true; });
+  }
+
+  /* Joe writing one in himself \u2014 a job taken over the phone. Goes through the
+     owner's door, so it is not held to the times the website advertises. */
+  function createBooking(fields) {
+    return ask('/admin/bookings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(fields)
+    }).then(function (data) { cache = data.bookings || []; remote = true; });
+  }
+
+  /* Joe's own diary. A run of days goes in as one event and comes back as one
+     row per day; the admin groups them again for display. */
+  function createEvent(fields) {
+    return ask('/admin/events', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(fields)
+    }).then(function (data) { events = data.events || []; remote = true; });
+  }
+
+  /* Deletes the whole run the row belongs to, because that is the single thing
+     Joe was shown and the single thing he thinks he is removing. */
+  function removeEvent(id) {
+    return ask('/admin/events/' + encodeURIComponent(id), { method: 'DELETE' })
+      .then(function (data) { events = data.events || []; remote = true; });
+  }
+
+  function getEvents() { return events.slice(); }
+  function getSync() { return sync ? JSON.parse(JSON.stringify(sync)) : null; }
+  function isSyncOn() { return syncOn; }
+
+  /* Go and read his calendar now rather than waiting for the half-hourly run. */
+  function syncNow() {
+    return ask('/admin/sync', { method: 'POST' }).then(function (data) {
+      events = data.events || [];
+      sync = data.sync || null;
+      return sync;
+    });
+  }
+
+  function getIgnore() { return ignore.slice(); }
+  function getReviewSync() { return reviewSync ? JSON.parse(JSON.stringify(reviewSync)) : null; }
+  function isReviewsAuto() { return reviewsAuto; }
+  function getReviewTouched() { return reviewTouched; }
+
+  /* Ask Google now rather than waiting for Monday. */
+  function checkReviews() {
+    return ask('/admin/reviews/sync', { method: 'POST' }).then(function (data) {
+      reviewSync = data.reviewSync || null;
+      if (data.reviews) { if (!server) server = {}; server.reviews = data.reviews; }
+      return reviewSync;
+    });
+  }
+
+  /* Saved and re-read in one go, so he sees the days come back rather than
+     being told they will. */
+  function saveIgnore(list) {
+    return ask('/admin/sync/ignore', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ignore: list })
+    }).then(function (data) {
+      ignore = data.ignore || [];
+      events = data.events || [];
+      if (data.sync) sync = data.sync;
+    });
+  }
+
+  function clearImported() {
+    return ask('/admin/sync', { method: 'DELETE' }).then(function (data) {
+      events = data.events || [];
+      sync = null;
+    });
+  }
+
+  function removeBooking(id) {
+    return ask('/admin/bookings/' + encodeURIComponent(id), { method: 'DELETE' })
+      .then(function (data) { cache = data.bookings || []; remote = true; });
+  }
+
+  function login(password) {
+    return ask('/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: password })
+    });
+  }
+
+  function logout() { return ask('/logout', { method: 'POST' }); }
+
+  function isRemote() { return remote; }
+
+  /* The subscribable feed. The token is only ever served to a logged-in owner,
+     so it is fetched rather than baked into the page. */
+  function feedUrl() {
+    var t = (server && server.feedToken) || defaults.feedToken || '';
+    return t ? location.origin + '/cal/' + t + '.ics' : '';
+  }
+
+  /* --- local-date helpers ------------------------------------------------ */
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function ymd(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function fromYmd(s) {
+    var p = String(s).split('-');
+    return new Date(+p[0], +p[1] - 1, +p[2]);
+  }
+  function today() {
+    var d = new Date();
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  }
+  var DOW = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  var MON = ['January', 'February', 'March', 'April', 'May', 'June',
+             'July', 'August', 'September', 'October', 'November', 'December'];
+  function longDate(s) {
+    var d = fromYmd(s);
+    return DOW[d.getDay()] + ' ' + d.getDate() + ' ' + MON[d.getMonth()];
+  }
+  /* Mon=0 … Sun=6, which is how the calendar grid and workDays are indexed. */
+  function isoDow(d) { return (d.getDay() + 6) % 7; }
+
+  /* --- iCalendar ---------------------------------------------------------
+     Events are written as FLOATING local times — no Z, no TZID. A floating
+     time means "this clock time, wherever the calendar is", which is exactly
+     what a one-man round wants: 9am is 9am on his phone, and Sydney/Brisbane
+     DST never enters into it. A TZID would need a full VTIMEZONE block and
+     would be wrong the moment he travelled. */
+
+  function parseSlot(slot) {
+    var m = /^\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i.exec(String(slot || ''));
+    if (!m) return null;
+    var h = +m[1], min = m[2] ? +m[2] : 0, ap = (m[3] || '').toLowerCase();
+    if (ap === 'pm' && h < 12) h += 12;
+    if (ap === 'am' && h === 12) h = 0;
+    if (h > 23 || min > 59) return null;
+    return h * 60 + min;
+  }
+
+  /* How long to make the event: the gap to the next start time the owner
+     offers, so re-spacing his slots re-sizes his diary entries with them. */
+  function slotMinutes(slot, slots) {
+    var mins = (slots || []).map(parseSlot).filter(function (x) { return x !== null; })
+      .sort(function (a, b) { return a - b; });
+    var at = parseSlot(slot);
+    if (at === null) return 60;
+    for (var i = 0; i < mins.length; i++) {
+      if (mins[i] === at && i + 1 < mins.length) {
+        var gap = mins[i + 1] - mins[i];
+        return Math.max(30, Math.min(180, gap));
+      }
+    }
+    return 60;
+  }
+
+  function icsTime(dateStr, minutes) {
+    var d = fromYmd(dateStr);
+    d.setMinutes(d.getMinutes() + minutes);
+    return d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + 'T' +
+           pad(d.getHours()) + pad(d.getMinutes()) + '00';
+  }
+
+  function icsStamp() {
+    var d = new Date();
+    return d.getUTCFullYear() + pad(d.getUTCMonth() + 1) + pad(d.getUTCDate()) + 'T' +
+           pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + pad(d.getUTCSeconds()) + 'Z';
+  }
+
+  function icsEsc(s) {
+    return String(s == null ? '' : s)
+      .replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,')
+      .replace(/\r?\n/g, '\\n');
+  }
+
+  /* RFC 5545 caps a content line at 75 octets; longer ones continue on a line
+     beginning with a space. Calendars reject a file that ignores this. */
+  function fold(line) {
+    if (line.length <= 73) return line;
+    var out = line.slice(0, 73), rest = line.slice(73);
+    while (rest.length > 72) {
+      out += '\r\n ' + rest.slice(0, 72);
+      rest = rest.slice(72);
+    }
+    return out + (rest ? '\r\n ' + rest : '');
+  }
+
+  function toIcs(bookings, opts) {
+    opts = opts || {};
+    var name = opts.name || 'Bookings';
+    var slots = opts.slots || [];
+    var lines = [
+      'BEGIN:VCALENDAR', 'VERSION:2.0',
+      'PRODID:-//Ethelium//Booking calendar//EN',
+      'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
+      'X-WR-CALNAME:' + icsEsc(name),
+      'X-WR-TIMEZONE:' + (opts.tz || 'Australia/Sydney')
+    ];
+    var stamp = icsStamp();
+
+    bookings.slice().sort(function (a, b) {
+      return a.date === b.date ? String(a.slot).localeCompare(b.slot)
+                               : a.date.localeCompare(b.date);
+    }).forEach(function (b) {
+      var start = parseSlot(b.slot);
+      if (start === null) return;
+      var mins = slotMinutes(b.slot, slots);
+      var desc = [
+        b.name ? 'Customer: ' + b.name : '',
+        b.phone ? 'Phone: ' + b.phone : '',
+        b.address ? 'Address: ' + b.address : '',
+        b.service ? 'Job: ' + b.service : '',
+        b.notes ? 'Notes: ' + b.notes : ''
+      ].filter(Boolean).join('\n');
+
+      lines.push('BEGIN:VEVENT');
+      lines.push('UID:' + icsEsc(b.id) + '@' + icsEsc(SLUG) + '.ethelium');
+      lines.push('DTSTAMP:' + stamp);
+      lines.push('DTSTART:' + icsTime(b.date, start));
+      lines.push('DTEND:' + icsTime(b.date, start + mins));
+      lines.push('SUMMARY:' + icsEsc((b.service || 'Booking') + (b.name ? ' — ' + b.name : '')));
+      if (b.address) lines.push('LOCATION:' + icsEsc(b.address));
+      if (desc) lines.push('DESCRIPTION:' + icsEsc(desc));
+      lines.push('STATUS:' + (b.status === 'done' ? 'CONFIRMED'
+                : b.status === 'confirmed' ? 'CONFIRMED' : 'TENTATIVE'));
+      /* An hour's warning is the difference between a diary and a reminder. */
+      lines.push('BEGIN:VALARM', 'ACTION:DISPLAY', 'TRIGGER:-PT1H',
+                 'DESCRIPTION:' + icsEsc((b.service || 'Booking') +
+                   (b.address ? ' — ' + b.address : '')), 'END:VALARM');
+      lines.push('END:VEVENT');
+    });
+
+    lines.push('END:VCALENDAR');
+    return lines.map(fold).join('\r\n') + '\r\n';
+  }
+
+  function downloadIcs(text, filename) {
+    try {
+      var blob = new Blob([text], { type: 'text/calendar;charset=utf-8' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+      return true;
+    } catch (e) { return false; }
+  }
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  /* A day is bookable when it is not in the past, not inside the owner's lead
+     time, falls on a working weekday, is not individually blocked, and still
+     has at least one slot that is neither taken nor closed off by hand. A time
+     the owner has closed is not shown as unavailable, it is simply not offered:
+     a customer has no business knowing he has a dentist appointment. */
+  function slotsFor(dateStr, avail, bookings) {
+    var taken = {};
+    bookings.forEach(function (b) { if (b.date === dateStr) taken[b.slot] = true; });
+    var shut = (avail.blockedSlots || {})[dateStr] || [];
+    return (avail.slots || []).map(function (s) {
+      return { time: s, taken: !!taken[s], blocked: shut.indexOf(s) !== -1 };
+    });
+  }
+
+  function dayState(dateStr, avail, bookings) {
+    var d = fromYmd(dateStr);
+    var min = today();
+    min.setDate(min.getDate() + (avail.leadDays || 0));
+    if (d < min) return { open: false, free: 0 };
+    if ((avail.blocked || []).indexOf(dateStr) !== -1) return { open: false, free: 0 };
+    if (!(avail.workDays || [])[isoDow(d)]) return { open: false, free: 0 };
+    var free = slotsFor(dateStr, avail, bookings).filter(function (s) {
+      return !s.taken && !s.blocked;
+    }).length;
+    return { open: free > 0, free: free };
+  }
+
+  window.ETH = {
+    slug: SLUG, defaults: defaults, get: get, set: set,
+    reviewPool: function () { return reviewPool.slice(); },
+    ymd: ymd, fromYmd: fromYmd, today: today, longDate: longDate,
+    isoDow: isoDow, escapeHtml: escapeHtml,
+    slotsFor: slotsFor, dayState: dayState, MON: MON, DOW: DOW,
+    toIcs: toIcs, downloadIcs: downloadIcs, parseSlot: parseSlot,
+    syncBookings: syncBookings, addBooking: addBooking, patchBooking: patchBooking,
+    createBooking: createBooking,
+    events: getEvents, createEvent: createEvent, removeEvent: removeEvent,
+    sync: getSync, syncOn: isSyncOn, syncNow: syncNow, clearImported: clearImported,
+    ignore: getIgnore, saveIgnore: saveIgnore,
+    reviewSync: getReviewSync, reviewsAuto: isReviewsAuto, checkReviews: checkReviews,
+    reviewTouched: getReviewTouched,
+    removeBooking: removeBooking, login: login, logout: logout,
+    isRemote: isRemote, feedUrl: feedUrl
+  };
+})();
+
+/* Owner admin. Four tabs, each one a plain form over the store.
+   Saving writes straight through — there is no publish step in the demo because
+   the public page reads the same store on every load. */
+(function () {
+  'use strict';
+  var E = window.ETH, esc = E.escapeHtml;
+  /* --- session -----------------------------------------------------------
+     The demo checked the password in JavaScript, which stopped nobody — the
+     bookings were one curl away. Here the Worker holds the password and issues
+     an HttpOnly cookie, so this file never sees either and cannot be tricked
+     into letting someone in. */
+  function signedIn() {
+    /* Ask the server, not ourselves: the owner endpoint 401s unless the cookie
+       is real, so a successful read IS the proof of login. */
+    return fetch('/api/admin/bookings').then(function (r) { return r.ok; })
+      .catch(function () { return false; });
+  }
+  function signOut() { return E.logout().catch(function () {}); }
+
+  function toast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('on');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function () { t.classList.remove('on'); }, 2200);
+  }
+
+  /* --- form helpers ------------------------------------------------------ */
+  function field(key, label, value, hint, rows) {
+    var input = rows
+      ? '<textarea class="fld" rows="' + rows + '" data-f="' + key + '">' + esc(value) + '</textarea>'
+      : '<input class="fld" data-f="' + key + '" value="' + esc(value) + '">';
+    return '<div class="row"><label class="lbl">' + esc(label) + '</label>' + input +
+      (hint ? '<p class="hint">' + esc(hint) + '</p>' : '') + '</div>';
+  }
+  function group(title, body) {
+    return '<div class="card" style="margin-bottom:18px">' +
+      '<div style="font-size:15px;font-weight:700;letter-spacing:-.01em;margin-bottom:18px">' + esc(title) + '</div>' +
+      body + '</div>';
+  }
+  function saveBar(label) {
+    return '<div style="display:flex;gap:12px;align-items:center;margin-top:4px">' +
+      '<button class="btn btn-p" type="button" data-save="1">' + esc(label) + '</button>' +
+      '<span class="hint" style="margin:0">Changes show on your website straight away.</span></div>';
+  }
+  function readFields(root) {
+    var out = {};
+    root.querySelectorAll('[data-f]').forEach(function (el) {
+      out[el.getAttribute('data-f')] = el.value;
+    });
+    return out;
+  }
+  function pair(a1, b1) {
+    return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">' + a1 + b1 + '</div>';
+  }
+  function cell(label, input, hint) {
+    return '<div class="row"><label class="lbl">' + esc(label) + '</label>' + input +
+      (hint ? '<p class="hint">' + esc(hint) + '</p>' : '') + '</div>';
+  }
+  /* A dropdown of the times Joe offers, plus a door out of it. Used by the
+     booking form and by his diary, which have the same problem: most of the
+     time it is one of his slots, and occasionally it is quarter past three. */
+  function timeSelect(key, slots, firstLabel) {
+    return '<select class="fld" data-f="' + key + '" id="' + key + '-sel">' +
+      (firstLabel ? '<option value="">' + esc(firstLabel) + '</option>' : '') +
+      slots.map(function (x) { return '<option>' + esc(x) + '</option>'; }).join('') +
+      '<option value="__other">Another time…</option></select>' +
+      '<input class="fld" data-f="' + key + 'Other" id="' + key + '-other" hidden ' +
+      'placeholder="e.g. 3:30 pm" style="margin-top:8px">';
+  }
+  function wireTimeSelect(key) {
+    var sel = document.getElementById(key + '-sel');
+    var other = document.getElementById(key + '-other');
+    if (!sel || !other) return;
+    if (!sel.querySelector('option[value=""]') && sel.options.length === 1) {
+      sel.value = '__other'; other.hidden = false;
+    }
+    sel.addEventListener('change', function () {
+      other.hidden = sel.value !== '__other';
+      if (!other.hidden) other.focus();
+    });
+  }
+  function readTime(fields, key) {
+    return fields[key] === '__other' ? String(fields[key + 'Other'] || '').trim() : fields[key];
+  }
+
+  /* One event was written as one row per day. Put the run back together, so a
+     week away reads as a week away and deletes in one go. */
+  function eventRuns() {
+    var by = {}, order = [];
+    E.events().forEach(function (e) {
+      /* A mirrored entry groups on its calendar UID alone: one job is one
+         thing, even where it covers two slots and eight scattered dates. A
+         hand-typed run shares the moment it was written instead. */
+      var k = e.source === 'ical'
+        ? 'ical|' + e.uid
+        : e.title + '|' + e.created + '|' + e.slot;
+      if (!by[k]) {
+        by[k] = { id: e.id, title: e.title, slot: e.slot, notes: e.notes,
+                  source: e.source || 'admin', days: [], slots: [] };
+        order.push(k);
+      }
+      if (by[k].days.indexOf(e.date) === -1) by[k].days.push(e.date);
+      if (e.slot && by[k].slots.indexOf(e.slot) === -1) by[k].slots.push(e.slot);
+    });
+    return order.map(function (k) {
+      var g = by[k];
+      g.days.sort();
+      g.from = g.days[0];
+      g.to = g.days[g.days.length - 1];
+      g.contiguous = g.days.length ===
+        Math.round((E.fromYmd(g.to) - E.fromYmd(g.from)) / 86400000) + 1;
+      g.slots.sort(function (a, b) { return slotOrder(a) - slotOrder(b); });
+      return g;
+    }).sort(function (a, b) {
+      return a.from.localeCompare(b.from) || String(a.slot).localeCompare(b.slot);
+    });
+  }
+  function eventsOn(dateStr) {
+    return E.events().filter(function (e) { return e.date === dateStr; });
+  }
+  /* Where a time sits in the day, by his own list rather than by parsing it
+     again. Anything he no longer offers sorts to the front, which is where an
+     oddity belongs: visible. */
+  function slotOrder(slot) {
+    return (E.get('availability').slots || []).indexOf(slot);
+  }
+
+  function runWhen(g) {
+    var when;
+    if (g.days.length === 1) when = E.longDate(g.from);
+    else if (g.contiguous) when = E.longDate(g.from) + ' – ' + E.longDate(g.to);
+    else {
+      /* Every third Friday is not "the 4th to the 27th". Say how many days it
+         actually takes and when the next one is, which is what he wants to know. */
+      when = g.days.length + ' days, next ' + E.longDate(g.from);
+    }
+    return when + (g.slots.length ? ' at ' + g.slots.join(' & ') : ', all day');
+  }
+
+  function lines(s) {
+    return String(s || '').split('\n').map(function (x) { return x.trim(); })
+      .filter(function (x) { return x.length; });
+  }
+
+  /* --- tab: website text ------------------------------------------------- */
+  function tabContent(panel) {
+    var c = E.get('content');
+    var svc = c.services || [];
+
+    panel.innerHTML =
+      group('Your name and phone',
+        field('business', 'Business name', c.business) +
+        field('brand', 'Short name (the logo text, top left)', c.brand) +
+        field('phone', 'Phone number', c.phone, 'Used for every "call us" link on the site.') +
+        field('hours_note', 'Opening hours', c.hours_note) +
+        field('credential', 'Line under the big heading', c.credential,
+          'Sits under the heading on your front page with a tick beside it. Empty it to take it off.') +
+        field('whatsapp', 'WhatsApp number', c.whatsapp,
+          'Country code first, no plus and no spaces \u2014 61418435193 for an Australian mobile. ' +
+          'Puts a Message us button on your site that opens straight into a chat with you. ' +
+          'Empty this box to take the button off.') +
+        field('whatsapp_text', 'What their message starts with', c.whatsapp_text,
+          'Filled in for them so they only have to hit send.')) +
+
+      group('The big heading',
+        field('eyebrow', 'Small line above the heading', c.eyebrow) +
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px" class="two">' +
+        field('h1_a', 'Line one', c.h1_a) +
+        field('h1_b', 'Line two', c.h1_b) +
+        field('h1_accent', 'Last word (italic)', c.h1_accent) + '</div>' +
+        field('hero_lead', 'Paragraph under the heading', c.hero_lead, '', 3)) +
+
+      group('About you',
+        field('about_lead_pre', 'Opening word', c.about_lead_pre, 'Reads: [this] [your short name] [the sentence below].') +
+        field('about_lead_post', 'The big sentence', c.about_lead_post, '', 2) +
+        field('about_lead_muted', 'Grey sentence after it', c.about_lead_muted, '', 2) +
+        field('about_body', 'The longer paragraph', c.about_body, '', 5)) +
+
+      group('Your three services',
+        svc.map(function (s, i) {
+          return '<div style="padding:16px 0;border-top:' + (i ? '1px solid rgba(20,40,20,.09)' : '0') + '">' +
+            '<div style="font-size:12px;font-weight:700;color:rgba(23,26,23,.5);margin-bottom:12px">SERVICE ' + (i + 1) + '</div>' +
+            field('svc' + i + '_title', 'Name', s.title) +
+            field('svc' + i + '_tag', 'Label on the photo box', s.tag) +
+            field('svc' + i + '_body', 'Description', s.body, '', 3) + '</div>';
+        }).join('')) +
+
+      group('Areas you cover',
+        field('area_blurb', 'Paragraph', c.area_blurb, '', 3) +
+        field('areas_all', 'Line under the suburbs', c.areas_all,
+          'Sits under the list of suburbs. Empty it to take it off.') +
+        field('suburbs', 'Suburbs — one per line', (c.suburbs || []).join('\n'),
+          'The first one is highlighted. Shown as buttons on the site.', 8)) +
+
+      group('The booking form',
+        field('booking_services', 'Job types a customer can pick — one per line',
+          (c.booking_services || []).join('\n'), '', 6)) +
+
+      group('Bottom of the page',
+        field('cta_heading_a', 'Closing heading, line one', c.cta_heading_a) +
+        field('cta_heading_b', 'Closing heading, line two (italic)', c.cta_heading_b) +
+        field('cta_body', 'Closing paragraph', c.cta_body, '', 2) +
+        field('footer_blurb', 'Footer paragraph', c.footer_blurb, '', 3)) +
+
+      saveBar('Save my website text');
+
+    panel.querySelector('[data-save]').addEventListener('click', function () {
+      var f = readFields(panel);
+      var next = E.get('content');
+      ['business', 'brand', 'phone', 'hours_note', 'credential', 'areas_all', 'eyebrow', 'h1_a', 'h1_b',
+       'h1_accent', 'hero_lead', 'about_lead_pre', 'about_lead_post',
+       'about_lead_muted', 'about_body', 'area_blurb', 'cta_heading_a',
+       'cta_heading_b', 'cta_body', 'footer_blurb'].forEach(function (k) {
+        next[k] = f[k];
+      });
+      next.services = svc.map(function (s, i) {
+        return { tag: f['svc' + i + '_tag'], title: f['svc' + i + '_title'], body: f['svc' + i + '_body'] };
+      });
+      next.suburbs = lines(f.suburbs);
+      next.booking_services = lines(f.booking_services);
+      E.set('content', next);
+      toast('Saved — your website is updated');
+    });
+  }
+
+  /* --- tab: availability ------------------------------------------------- */
+  var availView;
+  var availPick = null;   // the date whose times are open for editing, if any
+
+  function ago(iso) {
+    var then = Date.parse(iso);
+    if (!then) return 'never';
+    var mins = Math.round((Date.now() - then) / 60000);
+    if (mins < 2) return 'just now';
+    if (mins < 60) return mins + ' minutes ago';
+    if (mins < 60 * 20) return Math.round(mins / 60) + ' hours ago';
+    return 'on ' + E.longDate(new Date(then));
+  }
+
+  /* His Google Calendar, mirrored one way. Everything on it closes the matching
+     times here; nothing here is ever written back to it. */
+  function syncCard() {
+    var st = E.sync();
+    var on = E.syncOn();
+    var mirrored = E.events().filter(function (e) { return e.source === 'ical'; });
+
+    var line;
+    if (!on && !mirrored.length) {
+      line = 'Not connected yet. Once it is, everything in your Google Calendar closes the matching times on your website by itself, and you carry on using the calendar exactly as you do now.';
+    } else if (st && st.ok) {
+      line = 'Read ' + ago(st.at) + '. ' + st.entries + ' entries on your calendar, closing ' +
+        st.blocks + (st.blocks === 1 ? ' time' : ' times') + ' here' +
+        (st.skipped ? ', and ' + st.skipped + ' it could not make sense of' : '') + '.' +
+        /* Looked at every quarter hour; only written down when it moves. */
+        (st.changedAt && st.changedAt !== st.at ? ' Last change ' + ago(st.changedAt) + '.' : '');
+    } else if (st && st.error) {
+      line = 'The last try, ' + ago(st.at) + ', did not work: ' + st.error;
+    } else if (mirrored.length) {
+      line = mirrored.length + ' entries were brought over from your calendar.';
+    } else {
+      line = 'Connected. It has not been read yet — it goes and looks every half hour.';
+    }
+
+    return group('Your Google Calendar',
+      '<p class="hint" style="margin:-4px 0 16px">' + esc(line) + '</p>' +
+      '<div style="display:flex;gap:10px;flex-wrap:wrap">' +
+      (on ? '<button class="btn btn-s" type="button" id="sync-now" style="padding:8px 14px;font-size:12px">Read it now</button>' : '') +
+      (mirrored.length ? '<button class="btn btn-d" type="button" id="sync-clear" style="padding:8px 14px;font-size:12px">Forget what it brought</button>' : '') +
+      '</div>' +
+      (on ? '<p class="hint" style="margin:14px 0 0">It reads your calendar every fifteen minutes on its own. Nothing here is ever written back to it, so your calendar stays yours.</p>' : '') +
+
+      /* The escape hatch for entries that are labels rather than places to be.
+         Sitting inside this card because it only means anything here. */
+      '<div style="border-top:1px solid rgba(20,40,20,.1);margin-top:20px;padding-top:18px">' +
+      '<label class="lbl">Things on your calendar that should NOT close your website</label>' +
+      '<textarea class="fld" rows="4" data-f="ignore" placeholder="Wk&#10;T3&#10;T4">' +
+        esc(E.ignore().join('\n')) + '</textarea>' +
+      '<p class="hint">One per line. Anything on your calendar whose name <em>starts with</em> one of these is ignored, and those times stay open for customers. Everything else still closes your website as normal.</p>' +
+      '<p class="hint" style="margin-top:-4px">Use it for the school week labels — <strong>Wk8</strong>, <strong>T3 Ends</strong> — which sit across whole weeks and would otherwise shut you for a fortnight. Leave the real ones, like a Book Fair, out of this box so they keep closing the day.</p>' +
+      (st && st.ignored ? '<p class="hint"><strong>' + st.ignored + '</strong> ' +
+        (st.ignored === 1 ? 'entry is' : 'entries are') + ' being ignored right now.</p>' : '') +
+      '<button class="btn btn-p" type="button" id="ign-save" style="margin-top:6px">Save and re-read my calendar</button>' +
+      '</div>');
+  }
+
+  function wireSyncCard(panel) {
+    var now = document.getElementById('sync-now');
+    if (now) now.addEventListener('click', function () {
+      now.disabled = true;
+      now.textContent = 'Reading…';
+      E.syncNow().then(function (st) {
+        toast('Read your calendar — ' + st.blocks + ' times closed');
+        tabAvailability(panel);
+      }, function (err) {
+        now.disabled = false;
+        now.textContent = 'Read it now';
+        toast(err.message || 'Could not read it');
+      });
+    });
+
+    var ign = document.getElementById('ign-save');
+    if (ign) ign.addEventListener('click', function () {
+      var box = panel.querySelector('[data-f="ignore"]');
+      ign.disabled = true;
+      ign.textContent = 'Saving…';
+      E.saveIgnore(lines(box.value)).then(function () {
+        toast('Saved — your calendar has been read again');
+        tabAvailability(panel);
+      }, function (err) {
+        ign.disabled = false;
+        ign.textContent = 'Save and re-read my calendar';
+        toast(err.message || 'Could not save that');
+      });
+    });
+
+    var clear = document.getElementById('sync-clear');
+    if (clear) clear.addEventListener('click', function () {
+      if (!confirm('Forget everything brought over from your Google Calendar? Those times open back up. Anything you typed in here yourself stays.')) return;
+      E.clearImported().then(function () {
+        toast('Forgotten');
+        tabAvailability(panel);
+      }, function (err) { toast(err.message || 'Could not do that'); });
+    });
+  }
+
+  /* What Joe is doing instead of mowing. It closes the website exactly the way
+     a manual block does, and unlike a manual block it has a name, so it reaches
+     his phone calendar as something he can read. */
+  function diaryCard() {
+    var slots = E.get('availability').slots || [];
+    var today = E.ymd(E.today());
+    var upcoming = eventRuns().filter(function (g) { return g.to >= today; });
+    var mirrored = upcoming.filter(function (g) { return g.source === 'ical'; });
+    upcoming = upcoming.filter(function (g) { return g.source !== 'ical'; });
+
+    /* Folded away: his round is sixty-odd repeating jobs and he does not need
+       them listed above the box he types into. Shown, but not in the way. */
+    var fromCal = mirrored.length
+      ? '<details style="margin-bottom:20px">' +
+        '<summary style="cursor:pointer;font-size:12.5px;font-weight:600;color:#3f6a34">' +
+        mirrored.length + ' from your Google Calendar</summary>' +
+        '<div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;max-height:320px;overflow:auto">' +
+        mirrored.map(function (g) {
+          return '<div style="padding:10px 12px;border-radius:9px;background:#f4f6f2;' +
+            'border:1px solid rgba(20,40,20,.08)">' +
+            '<div style="font-size:12.5px;font-weight:600">' + esc(g.title) + '</div>' +
+            '<div style="font-size:11.5px;color:rgba(23,26,23,.55);margin-top:2px">' + esc(runWhen(g)) + '</div>' +
+            '</div>';
+        }).join('') + '</div>' +
+        '<p class="hint" style="margin:12px 0 0">These come from your calendar, so they change when you change them there.</p>' +
+        '</details>'
+      : '';
+
+    var list = upcoming.length
+      ? '<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">' +
+        upcoming.map(function (g) {
+          return '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;' +
+            'padding:12px 14px;border-radius:10px;background:#f4f6f2;border:1px solid rgba(20,40,20,.1)">' +
+            '<div><div style="font-size:13.5px;font-weight:700">' + esc(g.title) + '</div>' +
+            '<div style="font-size:12px;color:rgba(23,26,23,.6);margin-top:2px">' + esc(runWhen(g)) + '</div>' +
+            (g.notes ? '<div style="font-size:11.5px;color:rgba(23,26,23,.5);margin-top:4px">' + esc(g.notes) + '</div>' : '') +
+            '</div><button class="btn btn-d" type="button" data-ev="' + esc(g.id) + '" ' +
+            'style="padding:7px 13px;font-size:12px;flex:none">Remove</button></div>';
+        }).join('') + '</div>'
+      : '<p class="hint" style="margin:-4px 0 20px">Nothing typed in here. Anything you put in closes the website for that day or that time, and turns up in your phone calendar next to the jobs.</p>';
+
+    return group('Your own diary',
+      fromCal +
+      list +
+      '<div style="border-top:1px solid rgba(20,40,20,.1);padding-top:18px">' +
+      pair(cell('What is it?', '<input class="fld" data-f="title" placeholder="Dentist, day off, away">'),
+           cell('When', timeSelect('evslot', slots, 'All day'))) +
+      pair(cell('First day', '<input class="fld" type="date" data-f="date">'),
+           cell('Last day', '<input class="fld" type="date" data-f="until">', 'Leave blank if it is just the one day.')) +
+      cell('Notes', '<input class="fld" data-f="notes">') +
+      '<div style="display:flex;gap:12px;align-items:center;margin-top:4px">' +
+      '<button class="btn btn-p" type="button" id="ev-save">Add to my diary</button>' +
+      '<span class="hint" style="margin:0">Closes the website, and shows up in your calendar.</span></div></div>');
+  }
+
+  function wireDiaryCard(panel) {
+    wireTimeSelect('evslot');
+
+    panel.querySelectorAll('[data-ev]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        if (!confirm('Take this out of your diary? Those times open back up on your website.')) return;
+        E.removeEvent(btn.getAttribute('data-ev')).then(function () {
+          toast('Taken out of your diary');
+          tabAvailability(panel);
+        }, function (err) { toast(err.message || 'Could not remove that'); });
+      });
+    });
+
+    var save = document.getElementById('ev-save');
+    save.addEventListener('click', function () {
+      var f = readFields(panel);
+      if (!String(f.title || '').trim()) return toast('Give it a name first');
+      if (!f.date) return toast('Pick the day it is on');
+      save.disabled = true;
+      E.createEvent({
+        title: f.title, date: f.date, until: f.until,
+        slot: readTime(f, 'evslot'), notes: f.notes
+      }).then(function () {
+        toast('Added to your diary');
+        tabAvailability(panel);
+      }, function (err) {
+        save.disabled = false;
+        toast(err.message || 'Could not add that');
+      });
+    });
+  }
+
+  function tabAvailability(panel) {
+    var a = E.get('availability');
+    var names = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+    panel.innerHTML =
+      group('Days you work',
+        '<p class="hint" style="margin:-8px 0 16px">Untick a day and it closes on the calendar every week.</p>' +
+        '<div style="display:flex;flex-wrap:wrap;gap:10px">' +
+        names.map(function (n, i) {
+          return '<label style="display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:999px;border:1px solid rgba(20,40,20,.16);background:#fff;font-size:13px;font-weight:600;cursor:pointer">' +
+            '<input type="checkbox" data-day="' + i + '"' + ((a.workDays || [])[i] ? ' checked' : '') + '> ' + n + '</label>';
+        }).join('') + '</div>') +
+
+      group('Start times you offer',
+        field('slots', 'One per line', (a.slots || []).join('\n'),
+          'These are the times a customer can pick on any day you are open.', 7) +
+        field('leadDays', 'Days notice you need', String(a.leadDays || 0),
+          'Put 1 and today is closed off; put 0 and someone can book you for today.')) +
+
+      group('Block out days and times',
+        '<p class="hint" style="margin:-8px 0 18px">Holidays, rain, a dentist appointment at two. Click a date to open it, then close the whole day or just the times you cannot make. Grey days are days you do not work.</p>' +
+        '<div style="max-width:420px">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">' +
+        '<div id="av-month" style="font-size:15px;font-weight:700"></div>' +
+        '<div style="display:flex;gap:8px">' +
+        '<button class="btn btn-s" type="button" id="av-prev" style="padding:8px 14px">‹</button>' +
+        '<button class="btn btn-s" type="button" id="av-next" style="padding:8px 14px">›</button></div></div>' +
+        '<div class="cal-dow"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>' +
+        '<div class="cal-days" id="av-days"></div>' +
+        '<div id="av-day" style="margin-top:22px"></div></div>') +
+
+      saveBar('Save my availability') +
+
+      syncCard() +
+      diaryCard();
+
+    var t = E.today();
+    if (!availView) {
+      /* Start on the first month with a day still to come. Late in a month the
+         current grid is entirely past, which looks like a dead calendar. */
+      availView = new Date(t.getFullYear(), t.getMonth(), 1);
+      var last = new Date(t.getFullYear(), t.getMonth() + 1, 0);
+      if (E.ymd(last) === E.ymd(t)) availView = new Date(t.getFullYear(), t.getMonth() + 1, 1);
+    }
+
+    function draw() {
+      var cur = E.get('availability');
+      var bookings = E.get('bookings');
+      document.getElementById('av-month').textContent = E.MON[availView.getMonth()] + ' ' + availView.getFullYear();
+      document.getElementById('av-prev').disabled =
+        (availView.getFullYear() < t.getFullYear()) ||
+        (availView.getFullYear() === t.getFullYear() && availView.getMonth() <= t.getMonth());
+
+      var host = document.getElementById('av-days');
+      host.innerHTML = '';
+      var first = new Date(availView.getFullYear(), availView.getMonth(), 1);
+      var lead = E.isoDow(first);
+      var days = new Date(availView.getFullYear(), availView.getMonth() + 1, 0).getDate();
+      var cells = [];
+      for (var i = 0; i < lead; i++) cells.push(null);
+      for (var d = 1; d <= days; d++) cells.push(new Date(availView.getFullYear(), availView.getMonth(), d));
+      while (cells.length % 7) cells.push(null);
+
+      cells.forEach(function (dt) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'cal-day';
+        if (!dt) { b.className += ' blank'; b.disabled = true; host.appendChild(b); return; }
+        var ds = E.ymd(dt);
+        var label = document.createElement('span');
+        label.textContent = dt.getDate();
+        b.appendChild(label);
+
+        var isPast = dt < t;
+        var blocked = (cur.blocked || []).indexOf(ds) !== -1;
+        var works = !!(cur.workDays || [])[E.isoDow(dt)];
+        var booked = bookings.filter(function (x) { return x.date === ds; }).length;
+        var shut = ((cur.blockedSlots || {})[ds] || []).length;
+        /* A day off in his diary closes the day as surely as the switch does,
+           so it wears the same colour; the panel below says which it was. */
+        var evs = eventsOn(ds);
+        var evAllDay = evs.filter(function (x) { return !x.slot; });
+        var evTimed = evs.filter(function (x) { return !!x.slot; });
+        var names = function (list) {
+          return list.map(function (x) { return x.title; }).join(', ');
+        };
+
+        if (isPast) { b.className += ' past'; b.disabled = true; }
+        else if (blocked || evAllDay.length) {
+          b.className += ' blocked';
+          b.title = evAllDay.length ? names(evAllDay) : 'Closed all day';
+        }
+        else if (!works) { b.className += ' off'; b.title = 'You do not work this day'; }
+        /* A part-closed day gets a tint and nothing else. The cell already
+           carries a "N booked" line; a second label would make it a paragraph. */
+        else if (shut || evTimed.length) {
+          b.className += ' partial';
+          b.title = evTimed.length
+            ? names(evTimed)
+            : shut + (shut === 1 ? ' time' : ' times') + ' closed';
+        }
+        if (!isPast && ds === availPick) b.setAttribute('aria-pressed', 'true');
+
+        if (booked && !isPast) {
+          var m = document.createElement('span');
+          m.className = 'mini';
+          m.textContent = booked + ' booked';
+          m.style.color = blocked ? '#9c3222' : '#3f6a34';
+          b.appendChild(m);
+        }
+
+        if (!isPast) {
+          b.addEventListener('click', function () {
+            availPick = (availPick === ds ? null : ds);
+            draw();
+          });
+        }
+        host.appendChild(b);
+      });
+      drawDay();
+    }
+
+    /* Closing a whole day and closing one time are the same job at two sizes,
+       so they share one panel under the calendar rather than two cards. Every
+       toggle saves on the spot, which is what the day grid already did. */
+    function drawDay() {
+      var host = document.getElementById('av-day');
+      if (!host) return;
+      var cur = E.get('availability');
+
+      if (!availPick) {
+        host.innerHTML = '<p class="hint" style="margin:0">Pick a date above to close the whole day, or just the times on it you cannot make.</p>';
+        return;
+      }
+
+      var ds = availPick;
+      var dayShut = (cur.blocked || []).indexOf(ds) !== -1;
+      var works = !!(cur.workDays || [])[E.isoDow(E.fromYmd(ds))];
+      var shut = (cur.blockedSlots || {})[ds] || [];
+      var booked = {};
+      E.get('bookings').forEach(function (b) { if (b.date === ds) booked[b.slot] = true; });
+
+      var dayEvents = eventsOn(ds);
+      var allDay = dayEvents.filter(function (x) { return !x.slot; });
+      var timed = {};
+      dayEvents.forEach(function (x) { if (x.slot) timed[x.slot] = x.title; });
+      var closedAllDay = dayShut || allDay.length > 0;
+
+      var html = '<div style="border-top:1px solid rgba(20,40,20,.1);padding-top:18px">' +
+        '<div style="font-size:14px;font-weight:700;margin-bottom:5px">' + esc(E.longDate(ds)) + '</div>' +
+        '<p class="hint" style="margin:0 0 14px">' +
+          (allDay.length
+            ? esc(allDay.map(function (x) { return x.title; }).join(', ')) +
+              ' \u2014 closed all day. Take it out of your diary below to open it back up.'
+            : dayShut ? 'Closed all day. Nobody can book it.'
+            : !works ? 'You do not work this weekday, so no times are offered on it.'
+            : 'Click a time to close it. Closed times stop being offered on your website.') +
+        '</p>' +
+        /* No switch when the diary already closed it: two ways to shut one day
+           is one way too many, and the diary entry is the one with a reason. */
+        (allDay.length ? ''
+          : '<button class="btn ' + (dayShut ? 'btn-s' : 'btn-d') + '" type="button" id="av-allday" ' +
+            'style="padding:8px 14px;font-size:12px">' +
+            (dayShut ? 'Open the whole day back up' : 'Close the whole day') + '</button>');
+
+      if (!closedAllDay && works) {
+        var slots = cur.slots || [];
+        html += slots.length
+          ? '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:16px">' +
+            slots.map(function (s) {
+              var ev = timed[s];
+              var off = !!ev || shut.indexOf(s) !== -1;
+              return '<button class="btn btn-s" type="button" data-slot="' + esc(s) + '" ' +
+                (ev ? 'disabled ' : '') +
+                'aria-pressed="' + (off ? 'true' : 'false') + '" ' +
+                'title="' + (ev ? esc(ev) + ' — remove it from your diary below'
+                  : off ? 'Closed — click to open it back up' : 'Open — click to close it') + '" ' +
+                'style="padding:8px 14px;font-size:12px' +
+                (off ? ';background:#fbeae6;border-color:#e2b3a6;color:#9c3222;text-decoration:line-through' : '') +
+                '">' + esc(s) +
+                (ev ? ' · ' + esc(ev) : booked[s] ? ' · booked' : '') + '</button>';
+            }).join('') + '</div>' +
+            '<p class="hint" style="margin:12px 0 0">Closing a time somebody has already booked does not cancel their job. It only stops that slot being sold again if you cancel it.</p>'
+          : '<p class="hint" style="margin:16px 0 0">You have no start times set above, so there is nothing to close.</p>';
+      }
+      host.innerHTML = html + '</div>';
+
+      var allDayBtn = document.getElementById('av-allday');
+      if (allDayBtn) allDayBtn.addEventListener('click', function () {
+        var v = E.get('availability');
+        var list = (v.blocked || []).slice();
+        var at = list.indexOf(ds);
+        if (at === -1) list.push(ds); else list.splice(at, 1);
+        v.blocked = list;
+        E.set('availability', v);
+        draw();
+        toast(at === -1 ? E.longDate(ds) + ' closed' : E.longDate(ds) + ' reopened');
+      });
+
+      host.querySelectorAll('[data-slot]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var s = btn.getAttribute('data-slot');
+          var v = E.get('availability');
+          /* Copied rather than mutated: E.get hands back a freshly merged
+             object, and writing through a stale reference would drop days. */
+          var map = {}, src = v.blockedSlots || {}, k;
+          for (k in src) if (Object.prototype.hasOwnProperty.call(src, k)) map[k] = (src[k] || []).slice();
+          var list = map[ds] || [];
+          var at = list.indexOf(s);
+          if (at === -1) list.push(s); else list.splice(at, 1);
+          if (list.length) map[ds] = list; else delete map[ds];
+          v.blockedSlots = map;
+          E.set('availability', v);
+          draw();
+          toast(at === -1 ? s + ' closed on ' + E.longDate(ds) : s + ' opened back up');
+        });
+      });
+    }
+
+    document.getElementById('av-prev').addEventListener('click', function () {
+      availView = new Date(availView.getFullYear(), availView.getMonth() - 1, 1); draw();
+    });
+    document.getElementById('av-next').addEventListener('click', function () {
+      availView = new Date(availView.getFullYear(), availView.getMonth() + 1, 1); draw();
+    });
+    draw();
+    wireSyncCard(panel);
+    wireDiaryCard(panel);
+
+    panel.querySelector('[data-save]').addEventListener('click', function () {
+      var f = readFields(panel);
+      var next = E.get('availability');
+      next.workDays = names.map(function (_, i) {
+        return panel.querySelector('[data-day="' + i + '"]').checked;
+      });
+      next.slots = lines(f.slots);
+      var lead = parseInt(f.leadDays, 10);
+      next.leadDays = isNaN(lead) || lead < 0 ? 0 : lead;
+      E.set('availability', next);
+      draw();
+      toast('Saved — your calendar is updated');
+    });
+  }
+
+  /* --- tab: bookings ----------------------------------------------------- */
+  var STATUS = {
+    'new': ['New', '#fff4d6', '#8a6300'],
+    confirmed: ['Confirmed', '#e6f4e4', '#2f6a2c'],
+    done: ['Done', '#eceef0', '#4a5560'],
+    calendar: ['Your calendar', '#eef2f6', '#40566b']
+  };
+
+  /* Same shape as an Airbnb calendar export: one https:// URL the owner copies
+     once into Google Calendar (or Apple, or whatever he uses) and it stays tied
+     to the website from then on. The webcal:// button is the same URL with the
+     scheme swapped, which is what makes an iPhone subscribe on a single tap. */
+  function calendarCard(count) {
+    var feed = E.feedUrl();
+    var webcal = feed.replace(/^https?:/, 'webcal:');
+    var live = E.isRemote();
+
+    if (!feed) {
+      return '<div class="card" style="margin-bottom:18px">' +
+        '<div style="font-size:15px;font-weight:700">Sync your bookings to your calendar</div>' +
+        '<p class="hint" style="margin-top:8px">Not available on this build.</p></div>';
+    }
+
+    return '<div class="card" style="margin-bottom:18px">' +
+      '<div style="font-size:15px;font-weight:700;letter-spacing:-.01em">Sync your bookings to your calendar</div>' +
+      '<p class="hint" style="margin-top:8px;margin-bottom:14px">Copy this link into Google Calendar (or Apple Calendar, or Outlook) once. ' +
+      'From then on it stays tied to your website &mdash; every booking that comes in shows up in your normal calendar by itself, ' +
+      'with the address, the phone number and the notes on it. Same idea as an Airbnb calendar link.</p>' +
+
+      '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px">' +
+      '<div style="flex:1;min-width:260px;padding:11px 13px;border-radius:9px;background:#f4f6f2;border:1px solid rgba(20,40,20,.1);' +
+      'font:500 11.5px/1.5 ui-monospace,Menlo,monospace;color:rgba(23,26,23,.7);word-break:break-all" id="ics-url">' + esc(feed) + '</div>' +
+      '<button class="btn btn-p" type="button" id="ics-copy">Copy link</button>' +
+      '</div>' +
+
+      '<details style="margin-bottom:12px">' +
+      '<summary style="cursor:pointer;font-size:12.5px;font-weight:600;color:#3f6a34">Where do I paste it?</summary>' +
+      '<div class="hint" style="margin-top:10px;line-height:1.75">' +
+      '<strong style="color:#1d2a1c">Google Calendar</strong> &mdash; open calendar.google.com on a computer, ' +
+      'click the <em>+</em> next to &ldquo;Other calendars&rdquo; on the left, choose <em>From URL</em>, paste, <em>Add calendar</em>.<br>' +
+      '<strong style="color:#1d2a1c">iPhone</strong> &mdash; just tap the button below on your phone.<br>' +
+      '<strong style="color:#1d2a1c">Outlook</strong> &mdash; Add calendar → Subscribe from web → paste.' +
+      '</div></details>' +
+
+      '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">' +
+      '<a class="btn btn-s" href="' + esc(webcal) + '">Add straight to my iPhone</a>' +
+      '<button class="btn btn-s" type="button" id="ics-dl"' + (count ? '' : ' disabled style="opacity:.45"') +
+      '>Download a one-off file</button>' +
+      '</div>' +
+
+      '<p class="hint" style="margin-top:14px">' +
+      (live
+        ? 'Live. Bookings are shared across every device &mdash; your phone, the office laptop, your customer&rsquo;s phone.'
+        : '<strong style="color:#9c3222">Offline.</strong> Cannot reach the booking server, so bookings are saved on this device only.') +
+      '</p>' +
+      '<p class="hint" style="margin-top:6px">Calendars decide for themselves how often to check &mdash; Google usually every few hours, ' +
+      'iPhone about once a day unless you set the subscription to refresh every 5 minutes. It is not instant, same as an Airbnb sync.</p>' +
+      '</div>';
+  }
+
+  function wireCalendarCard() {
+    var dl = document.getElementById('ics-dl');
+    if (dl && !dl.disabled) {
+      dl.addEventListener('click', function () {
+        var all = E.get('bookings');
+        if (!all.length) return;
+        var c = E.get('content');
+        var ok = E.downloadIcs(E.toIcs(all, {
+          name: (c.business || 'Bookings') + ' — bookings',
+          slots: E.get('availability').slots,
+          tz: E.defaults.tz
+        }), E.slug + '-bookings.ics');
+        toast(ok ? 'Calendar file downloaded' : 'Could not download on this browser');
+      });
+    }
+    var copy = document.getElementById('ics-copy');
+    if (copy) {
+      copy.addEventListener('click', function () {
+        var url = E.feedUrl();
+        function fallback() {
+          var el = document.getElementById('ics-url');
+          var r = document.createRange();
+          r.selectNodeContents(el);
+          var sel = window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(r);
+          toast('Link selected — press Cmd/Ctrl+C');
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(url).then(function () { toast('Link copied'); }, fallback);
+        } else fallback();
+      });
+    }
+  }
+
+  /* Joe writing in a job he took on the phone. It is folded away behind a
+     button because the list is what he opens this tab for; the form is the
+     occasional errand, not the main event. */
+  function addCard() {
+    var a = E.get('availability');
+    var svc = E.get('content').booking_services || [];
+    var slots = a.slots || [];
+
+    var svcInput = svc.length
+      ? '<select class="fld" data-f="service">' +
+        svc.map(function (x) { return '<option>' + esc(x) + '</option>'; }).join('') + '</select>'
+      : '<input class="fld" data-f="service">';
+
+    return '<div class="card" style="margin-bottom:18px">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:14px">' +
+      '<div style="font-size:15px;font-weight:700;letter-spacing:-.01em">Add a booking</div>' +
+      '<button class="btn btn-s" type="button" id="bk-add-toggle" style="padding:8px 14px;font-size:12px">Write one in</button>' +
+      '</div>' +
+      '<div id="bk-add" hidden style="margin-top:20px">' +
+      '<p class="hint" style="margin:-4px 0 18px">For a job you took over the phone. It closes that slot on your website straight away and turns up on your phone calendar with the rest.</p>' +
+      pair(cell('Date', '<input class="fld" type="date" data-f="date">'),
+           cell('Time', timeSelect('slot', slots, ''))) +
+      pair(cell('Name', '<input class="fld" data-f="name">'),
+           cell('Phone', '<input class="fld" data-f="phone" inputmode="tel">')) +
+      cell('Address', '<input class="fld" data-f="address">') +
+      pair(cell('What is the job?', svcInput),
+           cell('Notes', '<input class="fld" data-f="notes">')) +
+      '<div style="display:flex;gap:12px;align-items:center;margin-top:4px">' +
+      '<button class="btn btn-p" type="button" id="bk-add-save">Add to the diary</button>' +
+      '<span class="hint" style="margin:0">Saved as confirmed, and no email is sent.</span></div>' +
+      '</div></div>';
+  }
+
+  function wireAddCard(panel) {
+    var box = document.getElementById('bk-add');
+    wireTimeSelect('slot');
+
+    document.getElementById('bk-add-toggle').addEventListener('click', function () {
+      box.hidden = !box.hidden;
+      this.textContent = box.hidden ? 'Write one in' : 'Never mind';
+      if (!box.hidden) box.querySelector('[data-f="date"]').focus();
+    });
+
+    document.getElementById('bk-add-save').addEventListener('click', function () {
+      var f = readFields(box);
+      var slot = readTime(f, 'slot');
+      if (!f.date) return toast('Pick a date first');
+      if (!slot) return toast('Give it a time');
+      if (!String(f.name || '').trim()) return toast('Give it a name');
+
+      var btn = this;
+      btn.disabled = true;
+      E.createBooking({
+        date: f.date, slot: slot, name: f.name, phone: f.phone,
+        address: f.address, service: f.service, notes: f.notes
+      }).then(function () {
+        toast('Booking added');
+        tabBookings(panel);
+        refreshCount();
+      }, function (err) {
+        btn.disabled = false;
+        /* The unique index refusing a clash is the most likely landing here,
+           and its message already says what he needs to do about it. */
+        toast(err.message || 'Could not save that');
+      });
+    });
+  }
+
+  /* His round, as rows for the diary. It lives in the events table because the
+     sync owns it and rewrites it whole every half hour, which is why it cannot
+     carry a status he sets — but it is still work in his day, and hiding it in
+     another tab meant the one list that should show everything showed one job
+     out of two hundred. So it is shown here, plainly, and marked read-only. */
+  function calendarJobs() {
+    var today = E.ymd(E.today());
+    var by = {}, out = [];
+    E.events().forEach(function (e) {
+      if (e.source !== 'ical' || e.date < today) return;
+      var k = e.uid + '|' + e.date;
+      if (!by[k]) { by[k] = { calendar: true, date: e.date, name: e.title, slots: [] }; out.push(by[k]); }
+      if (e.slot && by[k].slots.indexOf(e.slot) === -1) by[k].slots.push(e.slot);
+    });
+    out.forEach(function (r) {
+      r.slots.sort(function (a, b) { return slotOrder(a) - slotOrder(b); });
+      r.slot = r.slots[0] || '';
+    });
+    return out;
+  }
+
+  function tabBookings(panel) {
+    var list = E.get('bookings').slice().concat(calendarJobs()).sort(function (a, b) {
+      if (a.date !== b.date) return a.date.localeCompare(b.date);
+      return slotOrder(a.slot) - slotOrder(b.slot);
+    });
+
+    if (!list.length) {
+      panel.innerHTML = addCard() + group('Bookings',
+        '<p style="margin:0;font-size:13.5px;line-height:1.7;color:rgba(23,26,23,.6)">Nothing booked yet. When somebody books through the calendar on your website, they land here — name, phone, address, what they want done and when.</p>' +
+        '<p class="hint">Try it: open your site, pick a day and book yourself in.</p>') +
+        calendarCard(0);
+      wireCalendarCard();
+      wireAddCard(panel);
+      return;
+    }
+
+    panel.innerHTML = addCard() + group('Bookings',
+      '<table><thead><tr><th>When</th><th>Who</th><th>Where</th><th>Job</th><th>Status</th><th></th></tr></thead><tbody>' +
+      list.map(function (b) {
+        /* Read-only: it is his calendar's row, not the website's. The website
+           may not confirm it, finish it or cancel it, and saying so in the row
+           is better than a button that quietly does nothing. */
+        if (b.calendar) {
+          var c = STATUS.calendar;
+          return '<tr>' +
+            '<td><strong>' + esc(E.longDate(b.date)) + '</strong><br><span style="color:rgba(23,26,23,.55)">' +
+              esc(b.slots.join(', ') || 'all day') + '</span></td>' +
+            '<td><strong>' + esc(b.name) + '</strong></td>' +
+            '<td style="color:rgba(23,26,23,.3)">' + '\u2014' + '</td>' +
+            '<td style="color:rgba(23,26,23,.3)">' + '\u2014' + '</td>' +
+            '<td><span class="pill" style="background:' + c[1] + ';color:' + c[2] + '">' + c[0] + '</span></td>' +
+            '<td style="text-align:right;white-space:nowrap;font-size:11.5px;color:rgba(23,26,23,.4)">' +
+              'change it in Google Calendar</td></tr>';
+        }
+        var s = STATUS[b.status] || STATUS['new'];
+        return '<tr>' +
+          '<td><strong>' + esc(E.longDate(b.date)) + '</strong><br><span style="color:rgba(23,26,23,.55)">' + esc(b.slot) + '</span></td>' +
+          '<td><strong>' + esc(b.name) + '</strong><br><a href="tel:' + esc(String(b.phone).replace(/\s+/g, '')) + '">' + esc(b.phone) + '</a></td>' +
+          '<td style="color:rgba(23,26,23,.7)">' + esc(b.address) + '</td>' +
+          '<td style="color:rgba(23,26,23,.7)">' + esc(b.service) +
+            (b.notes ? '<br><span style="font-size:11.5px;color:rgba(23,26,23,.5)">“' + esc(b.notes) + '”</span>' : '') + '</td>' +
+          '<td><span class="pill" style="background:' + s[1] + ';color:' + s[2] + '">' + s[0] + '</span></td>' +
+          '<td style="text-align:right;white-space:nowrap">' +
+            (b.status !== 'confirmed' && b.status !== 'done'
+              ? '<button class="btn btn-s" data-act="confirmed" data-id="' + esc(b.id) + '" style="padding:7px 13px;font-size:12px">Confirm</button> ' : '') +
+            (b.status !== 'done'
+              ? '<button class="btn btn-s" data-act="done" data-id="' + esc(b.id) + '" style="padding:7px 13px;font-size:12px">Done</button> ' : '') +
+            '<button class="btn btn-d" data-act="delete" data-id="' + esc(b.id) + '" style="padding:7px 13px;font-size:12px">Cancel</button>' +
+          '</td></tr>';
+      }).join('') + '</tbody></table>') + calendarCard(list.length);
+
+    wireCalendarCard();
+    wireAddCard(panel);
+
+    panel.querySelectorAll('[data-act]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var id = btn.getAttribute('data-id'), act = btn.getAttribute('data-act');
+        var done;
+        if (act === 'delete') {
+          if (!confirm('Cancel this booking? The time opens back up on your website, and it disappears from your phone calendar.')) return;
+          done = E.removeBooking(id).then(function () { toast('Booking cancelled'); });
+        } else {
+          done = E.patchBooking(id, act).then(function () {
+            toast(act === 'done' ? 'Marked done' : 'Booking confirmed');
+          });
+        }
+        done.then(function () { tabBookings(panel); refreshCount(); });
+      });
+    });
+  }
+
+  function refreshCount() {
+    var n = E.get('bookings').filter(function (b) { return b.status === 'new'; }).length;
+    var el = document.getElementById('bk-count');
+    if (el) el.textContent = n ? '(' + n + ')' : '';
+  }
+
+  /* --- tab: reviews ------------------------------------------------------ */
+  function tabReviews(panel) {
+    var r = E.get('reviews');
+
+    var banner = r.connected
+      ? '<div class="card" style="margin-bottom:18px;background:#eef5ec;border-color:#c3ddbd">' +
+        '<div style="font-size:15px;font-weight:700">Your Google reviews</div>' +
+        '<p style="margin:9px 0 0;font-size:13px;line-height:1.7;color:rgba(23,26,23,.68)">Your website is showing ' +
+        '<strong>' + esc(r.rating) + ' stars from ' + esc(r.count) + ' reviews</strong>, copied from your real Google listing. ' +
+        /* It used to say these refreshed from Google by themselves. They do
+           not, and never did: there is no connection to Google here, only a
+           copy taken by hand. Saying otherwise meant the number quietly went
+           stale while he believed it was looking after itself. */
+        (E.reviewsAuto()
+          ? (function () {
+              var rs = E.reviewSync();
+              var line = 'Checked every Monday, straight from Google, so the number keeps itself right.';
+              if (rs && rs.ok) {
+                line += ' Last checked ' + ago(rs.at) + '.';
+                if (rs.matched && rs.matched.name) {
+                  line += ' Reading the listing for ' + rs.matched.name +
+                    (rs.matched.address ? ', ' + rs.matched.address : '') + '.';
+                }
+              } else if (rs && rs.error) {
+                line = 'The last check, ' + ago(rs.at) + ', did not work: ' + rs.error;
+              }
+              return esc(line) + '</p>' +
+                '<p style="margin:10px 0 0"><button class="btn btn-s" type="button" id="rev-check" ' +
+                'style="padding:8px 14px;font-size:12px">Check Google now</button></p>';
+            })()
+          : (function () {
+              /* Nobody is checking Google for him, so the job is to make the
+                 staleness impossible to miss rather than to pretend it is not
+                 there. Amber after a month, because that is about how long it
+                 takes a busy round to earn enough reviews to matter. */
+              var touched = E.reviewTouched();
+              var days = touched ? Math.floor((Date.now() - Date.parse(touched)) / 86400000) : null;
+              var stale = days === null || days >= 30;
+              var when = days === null ? 'It has not been updated since the site was built'
+                : days === 0 ? 'You updated it today'
+                : days === 1 ? 'You updated it yesterday'
+                : 'You last updated it ' + days + ' days ago';
+              return '<strong>This number does not update by itself.</strong> ' + esc(when) + '.</p>' +
+                (stale
+                  ? '<p style="margin:12px 0 0;padding:11px 13px;border-radius:9px;background:#fff6e6;' +
+                    'border:1px solid #e6cf9e;font-size:12.5px;line-height:1.65;color:#6b4e12">' +
+                    'Worth a look. Open your listing, read the rating and the number of reviews off it, ' +
+                    'and type them into the two boxes below. Takes ten seconds, and an out-of-date number ' +
+                    'sells you short.</p>'
+                  : '');
+            })()) +
+        (r.url ? '<p style="margin:12px 0 0;font-size:13px"><a href="' + esc(r.url) + '" target="_blank" rel="noopener">Open my Google listing ↗</a></p>' : '') +
+        '</div>'
+      : '<div class="card" style="margin-bottom:18px;background:#fff6e8;border-color:#e8d4ac">' +
+        '<div style="font-size:15px;font-weight:700">No Google listing found yet</div>' +
+        '<p style="margin:9px 0 0;font-size:13px;line-height:1.7;color:rgba(23,26,23,.68)">We looked and could not find a Google Business listing for you, so the reviews section on your website is sitting empty rather than showing made-up ones. ' +
+        'Getting you listed is the first job — it is free, it takes about ten minutes, and it is the single biggest thing you can do to get found. ' +
+        'Once it is up, paste the link here and your real reviews flow onto the site by themselves.</p></div>';
+
+    panel.innerHTML = banner +
+      group('Google listing',
+        field('url', 'Link to your Google listing', r.url,
+          r.connected ? '' : 'Leave this blank until you have one — an empty section is better than an invented one.') +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px" class="two">' +
+        (E.reviewsAuto()
+          ? '<div class="row"><label class="lbl">Star rating</label>' +
+            '<div class="fld" style="background:#f4f6f2;color:rgba(23,26,23,.7)">' + esc(r.rating) + '</div></div>' +
+            '<div class="row"><label class="lbl">Number of reviews</label>' +
+            '<div class="fld" style="background:#f4f6f2;color:rgba(23,26,23,.7)">' + esc(r.count) + '</div></div>'
+          : field('rating', 'Star rating', r.rating, 'Read from Google. Do not type a number you have not earned.') +
+            field('count', 'Number of reviews', r.count)) + '</div>') +
+
+      group('Reviews shown on your website',
+        (r.items && r.items.length
+          ? r.items.map(function (rv, i) {
+              return '<div style="padding:18px 0;border-top:' + (i ? '1px solid rgba(20,40,20,.09)' : '0') + '">' +
+                '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px">' +
+                '<div style="font-size:12px;font-weight:700;color:rgba(23,26,23,.5)">REVIEW ' + (i + 1) + '</div>' +
+                '<button class="btn btn-d" data-rm="' + i + '" style="padding:6px 13px;font-size:12px">Hide this one</button></div>' +
+                field('rv' + i + '_name', 'Name', rv.name) +
+                field('rv' + i + '_meta', 'Under their name', rv.meta) +
+                field('rv' + i + '_when', 'When', rv.when) +
+                field('rv' + i + '_text', 'What they wrote', rv.text, '', 4) +
+                field('rv' + i + '_reply', 'Your reply (optional)', rv.reply, '', 2) + '</div>';
+            }).join('')
+          : '<p style="margin:0 0 4px;font-size:13.5px;line-height:1.7;color:rgba(23,26,23,.6)">Nothing here yet. Your website shows a quiet placeholder in this section until there is something real to put in it.</p>') +
+        '<div style="margin-top:16px"><button class="btn btn-s" type="button" id="rv-add">Add a review</button></div>') +
+
+      saveBar('Save my reviews');
+
+    panel.querySelectorAll('[data-rm]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var i = +btn.getAttribute('data-rm');
+        var cur = E.get('reviews');
+        cur.items = (cur.items || []).filter(function (_, j) { return j !== i; });
+        E.set('reviews', cur);
+        tabReviews(panel);
+        toast('Review hidden');
+      });
+    });
+
+    document.getElementById('rv-add').addEventListener('click', function () {
+      var cur = E.get('reviews');
+      cur.items = (cur.items || []).concat([{ name: '', meta: '', when: '', text: '', reply: '' }]);
+      E.set('reviews', cur);
+      tabReviews(panel);
+    });
+
+    var revCheck = document.getElementById('rev-check');
+    if (revCheck) revCheck.addEventListener('click', function () {
+      revCheck.disabled = true;
+      revCheck.textContent = 'Asking Google…';
+      E.checkReviews().then(function (rs) {
+        toast(rs.changed ? 'Now ' + rs.rating + ' from ' + rs.count + ' reviews'
+                         : 'No change — still ' + rs.count + ' reviews');
+        tabReviews(panel);
+      }, function (err) {
+        revCheck.disabled = false;
+        revCheck.textContent = 'Check Google now';
+        toast(err.message || 'Could not reach Google');
+      });
+    });
+
+    panel.querySelector('[data-save]').addEventListener('click', function () {
+      var f = readFields(panel);
+      var next = E.get('reviews');
+      next.url = f.url;
+      /* Left exactly as they are while Google owns them: the boxes are not on
+         the page, so there is nothing to read, and the server would refuse a
+         stale number anyway. */
+      if (!E.reviewsAuto()) {
+        next.rating = f.rating;
+        next.count = f.count;
+      }
+      next.items = (next.items || []).map(function (_, i) {
+        return {
+          name: f['rv' + i + '_name'], meta: f['rv' + i + '_meta'],
+          when: f['rv' + i + '_when'], text: f['rv' + i + '_text'],
+          reply: f['rv' + i + '_reply']
+        };
+      }).filter(function (rv) { return rv.text && rv.text.trim(); });
+      /* The section only turns on when there is something real behind it. */
+      next.connected = next.items.length > 0 && !!String(next.url || '').trim();
+      E.set('reviews', next);
+      tabReviews(panel);
+      toast('Saved — your reviews are updated');
+    });
+  }
+
+  /* --- shell ------------------------------------------------------------- */
+  var TABS = { bookings: tabBookings, availability: tabAvailability, content: tabContent, reviews: tabReviews };
+
+  /* Bookings first and open by default. The copy and the availability are set
+     once and left alone; the diary is the reason he signs in. */
+  var current = 'bookings';
+
+  function show(name) {
+    current = name;
+    var panel = document.getElementById('panel');
+    panel.innerHTML = '';
+    document.querySelectorAll('.tab').forEach(function (t) {
+      t.setAttribute('aria-selected', t.getAttribute('data-tab') === name ? 'true' : 'false');
+    });
+    (TABS[name] || tabBookings)(panel);
+    refreshCount();
+  }
+
+  function boot() {
+    document.getElementById('gate').hidden = true;
+    document.getElementById('app').hidden = false;
+    E.syncBookings(true).then(function () {
+      refreshCount();
+      if (current === 'bookings') tabBookings(document.getElementById('panel'));
+    });
+    document.querySelectorAll('.tab').forEach(function (t) {
+      t.addEventListener('click', function () { show(t.getAttribute('data-tab')); });
+    });
+    document.getElementById('sign-out').addEventListener('click', function () {
+      signOut().then(function () { location.reload(); });
+    });
+    /* The demo had a "Start the demo over" card here that wiped the lot. On a
+       live site that is a button which deletes a real diary, so it is gone for
+       good; bookings are cancelled one at a time on the Bookings tab. */
+    show('bookings');
+
+    /* Somebody booking from their phone should appear here without a reload —
+       that is the whole point of the bookings being shared. */
+    setInterval(function () {
+      if (document.hidden) return;
+      var before = JSON.stringify(E.get('bookings'));
+      E.syncBookings(true).then(function () {
+        if (JSON.stringify(E.get('bookings')) === before) return;
+        refreshCount();
+        if (current === 'bookings') tabBookings(document.getElementById('panel'));
+      });
+    }, 20000);
+  }
+
+  document.getElementById('gate-form').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var pw = document.getElementById('pw');
+    var btn = ev.target.querySelector('button');
+    if (btn) btn.disabled = true;
+    E.login(pw.value).then(function () {
+      boot();
+    }).catch(function () {
+      document.getElementById('gate-err').style.display = 'block';
+      pw.value = '';
+      pw.focus();
+    }).then(function () { if (btn) btn.disabled = false; });
+  });
+
+  signedIn().then(function (yes) { if (yes) boot(); });
+})();
+
+</script>
+</body>
+</html>

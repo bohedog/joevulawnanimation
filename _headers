@@ -1,0 +1,47 @@
+# Cache rules for the static assets. build.py copies this to site/_headers.
+#
+# Every asset was being served max-age=0, must-revalidate — the Cloudflare
+# assets default. Nothing was re-downloaded (revalidation answers 304 with no
+# body) but a returning visitor still paid one network round trip for each of
+# sixty files before anything could paint from cache.
+#
+# Deliberately NOT the usual "max-age=31536000, immutable". That is correct only
+# when filenames change whenever their contents do, and these do not:
+# hero-pool-1800.jpg keeps its name when the photograph behind it is replaced,
+# and two of them were replaced today. Marked immutable for a year, Joe's
+# returning customers would be stuck with the old pictures and no way to shift
+# them short of renaming every file.
+#
+# So: a day of silence, then a week where the cached copy is served instantly
+# while a fresh one is fetched in the background. A photograph he swaps reaches
+# everyone within a day, and nobody waits on a round trip in the meantime.
+
+/*.jpg
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/*.png
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+# Fonts genuinely never change under a fixed name — these carry Google's own
+# version in the file — so they get the long immutable cache the photographs
+# cannot safely have.
+/*.woff2
+  Cache-Control: public, max-age=31536000, immutable
+
+# No separate rule for the icons, deliberately. The wildcards above already
+# cover them, and an overlapping rule here does not override — Cloudflare
+# appends, and the icons came back carrying two Cache-Control values stuck
+# together. A day plus a week of stale-while-revalidate is fine for a favicon.
+
+/admin.webmanifest
+  Cache-Control: public, max-age=86400
+
+# The pages themselves must stay uncached: the booking calendar's availability
+# is painted from them and a stale one is how slots that were already taken got
+# sold. /api/* sends no-store from the Worker and is untouched by this file.
+/
+  Cache-Control: public, max-age=0, must-revalidate
+/gallery
+  Cache-Control: public, max-age=0, must-revalidate
+/admin
+  Cache-Control: public, max-age=0, must-revalidate
